@@ -2,12 +2,15 @@ from pathlib import Path
 import sys, getopt
 from shutil import copyfile
 
+startDir: str
+copyDir: str
+
 
 def main(argv):
     val = 1
     if len(argv) >= 3:
-        startDir = str(argv[0])  # "C:\\WorkFolder\\ADC_IoT\\GenXStaticLibrary"
-        copyDir = str(argv[1])  # "C:\\WorkFolder\\ADC_IoT\\ADCN_Proj"
+        startDir = str(argv[0])  # "\\ADC_IoT\\GenXStaticLibrary"
+        copyDir = str(argv[1])  # "\\ADC_IoT\\ADCN_Proj"
         LookUpExtention = argv[2:]
     else:
         print("Wrong number of parameters")
@@ -44,6 +47,7 @@ def main(argv):
                 # print("Copy File from " + str(file.resolve()) + " to " + copyPath)
         if len(directories) > 0:
             file = directories[0]
+
             path = Path(file)
             # print("New path to: " + file)
             directories.remove(file)
@@ -56,7 +60,22 @@ def main(argv):
                 + str(copyFileCounter)
                 + " files was copied"
             )
+            remove_empty_dir(copyDir)
             val = 0
+
+
+def remove_empty_dir(directory):
+    isNotEmpty = False
+    if not Path(directory).exists():
+        exit
+    path = Path(directory).resolve()
+    for file in path.iterdir():
+        if not file.is_dir():
+            isNotEmpty = True
+        else:
+            if not remove_empty_dir(str(file.resolve())):
+                Path(file).rmdir()
+    return isNotEmpty
 
 
 if __name__ == "__main__":
