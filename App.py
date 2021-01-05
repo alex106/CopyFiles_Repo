@@ -5,10 +5,10 @@ from shutil import copyfile
 
 def main(argv):
     val = 1
-    if len(argv) >= 3
-        startDir = str(argv[0]) #"C:\\WorkFolder\\ADC_IoT\\GenXStaticLibrary\\GenXLib"
-        copyDir = str(argv[1])  #"C:\\WorkFolder\\ADC_IoT\\ADCN_Proj\\GenXLib"
-        LookUpExtention = str(argv[1])
+    if len(argv) >= 3:
+        startDir = str(argv[0])  # "C:\\WorkFolder\\ADC_IoT\\GenXStaticLibrary"
+        copyDir = str(argv[1])  # "C:\\WorkFolder\\ADC_IoT\\ADCN_Proj"
+        LookUpExtention = argv[2:]
     else:
         print("Wrong number of parameters")
         exit
@@ -25,18 +25,23 @@ def main(argv):
         for file in path.iterdir():
             copyPath = str(file.resolve()).replace(startDir, copyDir)
             if file.is_dir():
-                if not Path(copyPath).exists():
+                if copyPath.find(".") == -1:
                     # save directory full path
                     directories.append(str(file.resolve()))
-                    # Create directory in copy folder
-                    if copyPath.find(".") == -1:
+                    if not Path(copyPath).exists():
+                        # Create directory in copy folder
                         Path(copyPath).mkdir()
-                        print("Create path: " + copyPath)
+                        # print("Create path: " + copyPath)
             else:
-                if copyPath.find(".h") != -1:
+                doCopy = False
+                for ext in LookUpExtention:
+                    if copyPath.find(str(ext)) != -1:
+                        doCopy = True
+                        break
+                if doCopy == True:
                     copyFileCounter += 1
                     copyfile(str(file.resolve()), copyPath)
-                    # print("Copy File from " + str(file.resolve()) + " to " + copyPath)
+                # print("Copy File from " + str(file.resolve()) + " to " + copyPath)
         if len(directories) > 0:
             file = directories[0]
             path = Path(file)
@@ -44,7 +49,13 @@ def main(argv):
             directories.remove(file)
             PathCounter += 1
         else:
-            print("In %i directories %i files.", PathCounter, copyFileCounter)
+            print(
+                "In "
+                + str(PathCounter)
+                + " directories "
+                + str(copyFileCounter)
+                + " files was copied"
+            )
             val = 0
 
 
