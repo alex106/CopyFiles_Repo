@@ -2,6 +2,8 @@ from pathlib import Path
 import sys, getopt
 from shutil import copyfile
 
+RemoveCounter = 0
+
 
 def main(argv):
     val = 1
@@ -35,17 +37,12 @@ def main(argv):
                     if not Path(copyPath).exists():
                         # Create directory in copy folder
                         Path(copyPath).mkdir()
-                        print("Create path: " + copyPath)
+                        # print("Create path: " + copyPath)
             else:
-                doCopy = False
-                for ext in LookUpExtention:
-                    if copyPath.find(str(ext).strip()) != -1:
-                        doCopy = True
-                        break
-                if doCopy == True:
+                if is_extention(copyPath, LookUpExtention, False):
                     copyFileCounter += 1
                     copyfile(str(file.resolve()), copyPath)
-                    print("Copy File from " + str(file.resolve()) + " to " + copyPath)
+                    # print("Copy File from " + str(file.resolve()) + " to " + copyPath)
         if len(directories) > 0:
             file = directories[0]
 
@@ -61,11 +58,11 @@ def main(argv):
                 + str(copyFileCounter)
                 + " files was copied"
             )
-            remove_empty_dir(destDir)
+            remove_empty_dir(destDir, LookUpExtention)
             val = 0
 
 
-def remove_empty_dir(directory):
+def remove_empty_dir(directory, LookUpExtention):
     isNotEmpty = False
     if not Path(directory).exists():
         exit
@@ -74,11 +71,26 @@ def remove_empty_dir(directory):
         if not file.is_dir():
             isNotEmpty = True
         else:
-            if not remove_empty_dir(str(file.resolve())):
-                Path(file).rmdir()
-            else:
+            if is_extention(str(file.resolve()), LookUpExtention, True):
                 isNotEmpty = True
+            else:
+                if not remove_empty_dir(str(file.resolve()), LookUpExtention):
+                    Path(file).rmdir()
+                else:
+                    isNotEmpty = True
     return isNotEmpty
+
+
+def is_extention(fileName, Extentions, isDir):
+    for ext in Extentions:
+        isDot = False
+        if str(ext).find(".") != -1:
+            isDot = True
+        if isDir != isDot:
+            if fileName.find(str(ext).strip()) != -1:
+                return True
+            else:
+                return False
 
 
 if __name__ == "__main__":
