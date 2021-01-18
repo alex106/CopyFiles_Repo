@@ -89,8 +89,7 @@ def is_extention(fileName, Extentions, isDir):
         if isDir != isDot:
             if fileName.find(str(ext).strip()) != -1:
                 return True
-            else:
-                return False
+    return False
 
 
 if __name__ == "__main__":
